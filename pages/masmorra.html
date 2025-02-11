@@ -9,8 +9,63 @@
 </head>
 <body>
     <h1>Você esta na masmorra</h1>
-    <h2 id="apresentacao"></h2>
-    <button onclick="apresentacao()">apresentar</button>
+    <button onclick="jornada(inimigosN1)">aleatorios</button>
+    <div class="blocoDeAventura"></div>
 </body>
-<script src="../js/main.js"></script>
+<script>
+    function deusaDosNumerosAleatorios(){ // A Maldita deusa dos numeros aleatorios
+       return Math.floor(Math.random()*10)+1;
+    }
+
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let nome = urlParams.get("nome");
+    let forca = urlParams.get("forca");
+    let defesa = urlParams.get("defesa");
+    let sorte = urlParams.get("sorte");
+    let vidaHeroi = 100;
+    const inimigosN1 = {
+        "goblin": { vida: 10, defesa: 3, ataque: 2},
+        "goblin_batedor": { vida: 10, defesa: 2, ataque: 4},
+        "morcego": { vida: 5, defesa: 2, ataque: 3},
+        "serpente": { vida: 15, defesa: 5, ataque: 3}
+    }
+    let inimigosAbatidos = 0
+    function golpe(ataque, defesa, sorte=0){
+        let dano = ataque - defesa;
+        if (dano < 0){
+            dano = 0
+        }
+        if (sorte) {
+            if (deusaDosNumerosAleatorios() <= sorte){
+                dano*=2
+                alert("Critico")
+            }
+        }
+        return dano
+    }
+
+    function jornada(inimigos){
+        let inimigo = Object.keys(inimigos); // coleta o nomes dos inimigos
+        while (inimigosAbatidos < 5 && vidaHeroi > 0){
+            let inimigoAleatorio = inimigo[Math.floor(Math.random()*inimigo.length)]
+            console.log(`Um ${inimigoAleatorio} apareceu`)
+            let vidaInimigo = inimigos[inimigoAleatorio]["vida"];
+            while (vidaInimigo > 0 && vidaHeroi > 0){
+                vidaHeroi-=golpe(forca, inimigos[inimigoAleatorio]["defesa"], sorte);
+                vidaInimigo-=golpe(inimigos[inimigoAleatorio]["ataque"], defesa)
+
+            }
+            inimigosAbatidos++
+        } 
+        if (vidaHeroi <= 0){
+            console.log("Você foi derrotado")
+        } else {
+            console.log("Você completou o andar 1")
+        }
+        console.log("Fim da aventura")
+    }
+
+
+</script>
 </html>

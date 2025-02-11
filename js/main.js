@@ -20,9 +20,4 @@ function atribuir(){
     }
 }
 
-function apresentacao(){
-    console.log(nome);
-    console.log(forca);
-    console.log(defesa);
-    console.log(sorte);
-}
+
