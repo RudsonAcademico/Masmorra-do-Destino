@@ -8,9 +8,11 @@
     
 </head>
 <body>
-    <h1>Você esta na masmorra</h1>
-    <button onclick="jornada(inimigosN1)">aleatorios</button>
-    <div class="blocoDeAventura"></div>
+    <div class="blocoDeAventura">
+        <div id="andar"></div>
+        <div id="monstros"></div>
+        <button class="botao" onclick="golpe()">Atacar</button>
+    </div>
 </body>
 <script>
     function deusaDosNumerosAleatorios(){ // A Maldita deusa dos numeros aleatorios
@@ -24,47 +26,55 @@
     let defesa = urlParams.get("defesa");
     let sorte = urlParams.get("sorte");
     let vidaHeroi = 100;
-    const inimigosN1 = {
-        "goblin": { vida: 10, defesa: 3, ataque: 2},
-        "goblin_batedor": { vida: 10, defesa: 2, ataque: 4},
-        "morcego": { vida: 5, defesa: 2, ataque: 3},
-        "serpente": { vida: 15, defesa: 5, ataque: 3}
+    const inimigos = {
+        "Goblin": { vida: 10, defesa: 3, ataque: 2},
+        "Goblin_batedor": { vida: 10, defesa: 2, ataque: 4},
+        "Serpe": { vida: 15, defesa: 5, ataque: 3}
     }
+
+    const inimigosN2 = {
+
+    }
+
+
     let inimigosAbatidos = 0
     function golpe(ataque, defesa, sorte=0){
         let dano = ataque - defesa;
-        if (dano < 0){
-            dano = 0
+        if (dano <= 0){
+            dano = 1
         }
         if (sorte) {
             if (deusaDosNumerosAleatorios() <= sorte){
                 dano*=2
-                alert("Critico")
             }
         }
         return dano
     }
 
-    function jornada(inimigos){
-        let inimigo = Object.keys(inimigos); // coleta o nomes dos inimigos
-        while (inimigosAbatidos < 5 && vidaHeroi > 0){
-            let inimigoAleatorio = inimigo[Math.floor(Math.random()*inimigo.length)]
-            console.log(`Um ${inimigoAleatorio} apareceu`)
-            let vidaInimigo = inimigos[inimigoAleatorio]["vida"];
-            while (vidaInimigo > 0 && vidaHeroi > 0){
-                vidaHeroi-=golpe(forca, inimigos[inimigoAleatorio]["defesa"], sorte);
-                vidaInimigo-=golpe(inimigos[inimigoAleatorio]["ataque"], defesa)
+    document.getElementById("andar").innerHTML = `
+        <div class="titulo">
+           <h1>Herói: ${nome}</h1>
+           <p>Vida: ${vidaHeroi}|Força: ${forca}|Defesa:${defesa}|Sorte: ${sorte}</p>
+           
+        </div>
+        <p id="aventura"></p>`;
+    let inimigo = Object.keys(inimigos); // coleta o nomes dos inimigos
+    let inimigoDoAndar = inimigo[inimigosAbatidos]
+    document.getElementById("monstros").innerHTML = `
+    <h2>Monstro: ${inimigoDoAndar} </h2>
+    <p>Vida: ${inimigos[inimigoDoAndar]["vida"]}|Força: ${inimigos[inimigoDoAndar]["ataque"]}|Defesa:${inimigos[inimigoDoAndar]["defesa"]}|Especial: ${inimigos[inimigoDoAndar]["especial"]}</p>
+    `;
+    let vidaInimigo = inimigos[inimigoDoAndar]["vida"];
+        
+    /*while (vidaInimigo > 0 && vidaHeroi > 0){
+        vidaHeroi-=golpe(forca, inimigos[inimigoDoAndar]["defesa"], sorte);
+        vidaInimigo-=golpe(inimigos[inimigoDoAndar]["ataque"], defesa)
 
-            }
-            inimigosAbatidos++
-        } 
-        if (vidaHeroi <= 0){
-            console.log("Você foi derrotado")
-        } else {
-            console.log("Você completou o andar 1")
-        }
-        console.log("Fim da aventura")
-    }
+    }*/
+    
+    
+    
+    
 
 
 </script>
