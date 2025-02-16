@@ -27,44 +27,80 @@
     let sorte = urlParams.get("sorte");
     let vidaHeroi = 100;
     const inimigos = {
-        "Goblin": { vida: 10, defesa: 3, ataque: 2},
-        "Goblin_batedor": { vida: 10, defesa: 2, ataque: 4},
-        "Serpe": { vida: 15, defesa: 5, ataque: 3}
+        "Goblin": { vida: 10, defesa: 3, ataque: 2, especial: "Esquiva"},
+        "Goblin_batedor": { vida: 10, defesa: 2, ataque: 4, especial: "Segundo_Ataque"},
+        "Serpente": { vida: 15, defesa: 5, ataque: 3, especial: "Veneno"},
+        "Carniçal": { vida: 25, defesa: 3, ataque: 5, especial: "Sangria"},
+        "Gelatina": {vida: 20, defesa: 6, ataque: 6, especial: "Acido"},
+        "Ettin":  {vida: 20, defesa: 4, ataque: 6, especial: "Ataque_Duplo"}
     }
-
-    const inimigosN2 = {
-
-    }
-
-
+    let inimigo = Object.keys(inimigos); // coleta o nomes dos inimigos
     let inimigosAbatidos = 0
-    function golpe(ataque, defesa, sorte=0){
-        let dano = ataque - defesa;
-        if (dano <= 0){
-            dano = 1
-        }
-        if (sorte) {
-            if (deusaDosNumerosAleatorios() <= sorte){
-                dano*=2
-            }
-        }
-        return dano
-    }
+    let inimigoDoAndar = inimigo[inimigosAbatidos]
+    let vidaInimigo = inimigos[inimigoDoAndar]["vida"];
+
+
+
 
     document.getElementById("andar").innerHTML = `
         <div class="titulo">
            <h1>Herói: ${nome}</h1>
-           <p>Vida: ${vidaHeroi}|Força: ${forca}|Defesa:${defesa}|Sorte: ${sorte}</p>
+           <p id="estatus">Vida: ${vidaHeroi}|Força: ${forca}|Defesa:${defesa}|Sorte: ${sorte}</p>
            
         </div>
         <p id="aventura"></p>`;
-    let inimigo = Object.keys(inimigos); // coleta o nomes dos inimigos
-    let inimigoDoAndar = inimigo[inimigosAbatidos]
+    
     document.getElementById("monstros").innerHTML = `
     <h2>Monstro: ${inimigoDoAndar} </h2>
-    <p>Vida: ${inimigos[inimigoDoAndar]["vida"]}|Força: ${inimigos[inimigoDoAndar]["ataque"]}|Defesa:${inimigos[inimigoDoAndar]["defesa"]}|Especial: ${inimigos[inimigoDoAndar]["especial"]}</p>
+    <p>Vida: ${vidaInimigo}|Força: ${inimigos[inimigoDoAndar]["ataque"]}|Defesa:${inimigos[inimigoDoAndar]["defesa"]}|Especial: ${inimigos[inimigoDoAndar]["especial"]}</p>
     `;
-    let vidaInimigo = inimigos[inimigoDoAndar]["vida"];
+
+
+    function golpe(){
+        let danoHeroi = forca - inimigos[inimigoDoAndar]["defesa"];
+        if (danoHeroi <= 0){//Para não bugar e ficar em uma luta infinita de dano 0
+            danoHeroi = 1
+        }
+        if (deusaDosNumerosAleatorios() <= sorte){//Gera critico
+            danoHeroi*=2
+        }
+        let danoInimigo = inimigos[inimigoDoAndar]["ataque"] - defesa;
+        if (danoInimigo <= 0){//Para não bugar e ficar em uma luta infinita de dano 0
+            danoInimigo = 1
+        }
+        let especial = inimigos[inimigoDoAndar]["especial"];
+        
+
+        if (especial == "Esquiva"){ //Esta merda vai burgar e gera uma luta infinita de dano 0
+            if (deusaDosNumerosAleatorios() <= 6){
+                danoHeroi = 0;
+            }
+        } else if(especial == "Segundo_Ataque"){
+            if (deusaDosNumerosAleatorios() <= 4){
+                danoInimigo*=2;
+            }
+        } else if (especial == "Veneno") {
+            danoInimigo+=5;
+        } else if (especial == "Sangria"){
+            vidaInimigo+=danoInimigo;
+        } else if (especial == "Acido"){
+            danoInimigo = inimigos[inimigoDoAndar]["ataque"] - Math.floor(defesa / 2);
+        } else if (especial == "Ataque_Duplo"){
+            if (vidaInimigo/2 <= inimigos[inimigoDoAndar]["vida"]){
+                danoInimigo*=2;
+            }
+        } // eu percebi agora que eu podia fazer com mathcase mas eu ja terminei vai ficar assim
+        vidaInimigo-=danoHeroi;
+        vidaHeroi-=danoInimigo;
+        document.getElementById("monstros").innerHTML = `
+            <h2>Monstro: ${inimigoDoAndar} </h2>
+            <p>Vida: ${vidaInimigo}|Força: ${inimigos[inimigoDoAndar]["ataque"]}|Defesa:${inimigos[inimigoDoAndar]["defesa"]}|Especial: ${inimigos[inimigoDoAndar]["especial"]}</p>
+        `;
+        document.getElementById("estatus").innerHTML = `<p id="estatus">Vida: ${vidaHeroi}|Força: ${forca}|Defesa:${defesa}|Sorte: ${sorte}</p>`;
+        
+    }
+
+    
         
     /*while (vidaInimigo > 0 && vidaHeroi > 0){
         vidaHeroi-=golpe(forca, inimigos[inimigoDoAndar]["defesa"], sorte);
