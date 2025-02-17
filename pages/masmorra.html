@@ -71,7 +71,7 @@
         return document.getElementById("idblocoDeAventura").innerHTML = `
             <div class="titulo">
                 <h1>Parabéns</h1>
-                <h1>Você Desbravou toda a Masmorra</h1>
+                <h2>Você Desbravou toda a Masmorra</h2>
                 <a href='../index.html'><button class="botao" >Recomeçar</button></a>
             </div>`;
     }
@@ -86,6 +86,7 @@
     }
     
     function limpar(){
+        
         vidaInimigo = inimigos[inimigoDoAndar]["vida"];
         inimigosAbatidos++
         inimigoDoAndar = inimigo[inimigosAbatidos]
@@ -93,15 +94,19 @@
     }
 
     function detalhesDoMonstro(){//função que escreve estatisticas e do monstro
-        return document.getElementById("monstros").innerHTML = `
-            <div class="titulo">
-                <h2>Monstro: ${inimigoDoAndar} </h2>
-            </div>
-            <div class="atributos">
-                <p>Vida: ${vidaInimigo}|Força: ${inimigos[inimigoDoAndar]["ataque"]}|Defesa:${inimigos[inimigoDoAndar]["defesa"]}|Especial: ${inimigos[inimigoDoAndar]["especial"]}</p>
-            </div>    
-            `;
-        document.getElementById("estatus").innerHTML = `<p id="estatus">Vida: ${vidaHeroi}|Força: ${forca}|Defesa:${defesa}|Sorte: ${sorte}</p>`;
+        if (inimigosAbatidos != 6){
+            return document.getElementById("monstros").innerHTML = `
+                <div class="titulo">
+                    <h2>Monstro: ${inimigoDoAndar}</h2>
+                </div>
+                <div class="atributos">
+                    <p>Vida: ${vidaInimigo}|Força: ${inimigos[inimigoDoAndar]["ataque"]}|Defesa:${inimigos[inimigoDoAndar]["defesa"]}|Especial: ${inimigos[inimigoDoAndar]["especial"]}</p>
+                </div>    
+                `;
+            document.getElementById("estatus").innerHTML = `<p id="estatus">Vida: ${vidaHeroi}|Força: ${forca}|Defesa:${defesa}|Sorte: ${sorte}</p>`;
+        } else {
+            return vitoria()
+        }
     }
 
     function descricaoBatalhaHeroi(acontece){ // função que escreve a os o que ouve na batalha
@@ -130,21 +135,23 @@
     }
 
     function golpe(){
+        
         danoHeroi = forca - inimigos[inimigoDoAndar]["defesa"];
         danoInimigo = inimigos[inimigoDoAndar]["ataque"] - defesa;
         especial = inimigos[inimigoDoAndar]["especial"];
-        
+
         if (danoInimigo <= 0){//Para não bugar e ficar em uma luta infinita de dano 0
             danoInimigo = 1
         }
+
         if (danoHeroi <= 0){//Para não bugar e ficar em uma luta infinita de dano 0
             danoHeroi = 1
         }
+
         if (deusaDosNumerosAleatorios() <= sorte){//Gera critico
             danoHeroi*=2
             critico = true
         }
-        
         
 
         if (especial == "Esquiva"){ //Esta merda vai burgar e gera uma luta infinita de dano 0
@@ -162,7 +169,7 @@
         } else if (especial == "Sangria"){
             vidaInimigo+=Math.floor(danoInimigo / 2);
         } else if (especial == "Acido"){
-            danoInimigo = inimigos[inimigoDoAndar]["ataque"] - Math.floor(defesa / 2);
+            danoInimigo += Math.floor(defesa / 2);
         } else if (especial == "Ataque Duplo"){
             if (vidaInimigo/2 <= inimigos[inimigoDoAndar]["vida"]){
                 danoInimigo*=2;
@@ -171,25 +178,24 @@
         
         vidaInimigo-=danoHeroi;
         vidaHeroi-=danoInimigo;
+        
+        
         if(vidaHeroi > 0 && vidaInimigo > 0){
-            detalhesDoHeroi()
-            detalhesDoMonstro()
             descricaoBatalha(acontece)
 
         } else if (vidaInimigo <= 0){
             limpar()
             nivel()
-            detalhesDoHeroi()
-            detalhesDoMonstro()
+            
         } else if (vidaHeroi <= 0){
             gameover()
+            
         }
         critico = false;
         acontece = "";
+        detalhesDoHeroi()
+        detalhesDoMonstro()
         document.getElementById("derrota").innerHTML = `<p>Inimigos Abatidos: ${inimigosAbatidos}</p>`;
-        if (inimigosAbatidos == 6){
-            vitoria()
-        }
     }
     detalhesDoHeroi()
     detalhesDoMonstro()
