@@ -8,9 +8,11 @@
     
 </head>
 <body>
-    <div class="blocoDeAventura">
+    <div id="idblocoDeAventura" class="blocoDeAventura">
         <div id="andar"></div>
         <div id="monstros"></div>
+        <div id="aventura"></div>
+        <div id="derrota"></div>
         <button class="botao" onclick="golpe()">Atacar</button>
     </div>
 </body>
@@ -28,89 +30,170 @@
     let vidaHeroi = 100;
     const inimigos = {
         "Goblin": { vida: 10, defesa: 3, ataque: 2, especial: "Esquiva"},
-        "Goblin_batedor": { vida: 10, defesa: 2, ataque: 4, especial: "Segundo_Ataque"},
+        "Goblin Batedor": { vida: 10, defesa: 2, ataque: 4, especial: "Segundo Ataque"},
         "Serpente": { vida: 15, defesa: 5, ataque: 3, especial: "Veneno"},
         "Carniçal": { vida: 25, defesa: 3, ataque: 5, especial: "Sangria"},
         "Gelatina": {vida: 20, defesa: 6, ataque: 6, especial: "Acido"},
-        "Ettin":  {vida: 20, defesa: 4, ataque: 6, especial: "Ataque_Duplo"}
+        "Ettin":  {vida: 20, defesa: 4, ataque: 6, especial: "Ataque Duplo"}
     }
     let inimigo = Object.keys(inimigos); // coleta o nomes dos inimigos
     let inimigosAbatidos = 0
     let inimigoDoAndar = inimigo[inimigosAbatidos]
     let vidaInimigo = inimigos[inimigoDoAndar]["vida"];
+    let danoHeroi;
+    let danoInimigo;
+    let especial;
+    let critico = false;
+    let acontece;
+    let descricaoH;
+    let descricaoI;
 
+    function nivel(){
+        let n = Math.floor(Math.random()*3)+1;
+        if (n == 1){
+            forca++
+        } else if (n == 2){
+            defesa++
+        } else {
+            sorte++
+        }
+    }
 
+    function gameover(){
+        return document.getElementById("idblocoDeAventura").innerHTML = `
+            <div class="titulo">
+               <h1>Você foi Derrotado</h1>
+               <a href='../index.html'><button class="botao" >Recomeçar</button></a>
+            </div>`;
+    }
 
+    function vitoria(){
+        return document.getElementById("idblocoDeAventura").innerHTML = `
+            <div class="titulo">
+                <h1>Parabéns</h1>
+                <h1>Você Desbravou toda a Masmorra</h1>
+                <a href='../index.html'><button class="botao" >Recomeçar</button></a>
+            </div>`;
+    }
 
-    document.getElementById("andar").innerHTML = `
-        <div class="titulo">
-           <h1>Herói: ${nome}</h1>
-           <p id="estatus">Vida: ${vidaHeroi}|Força: ${forca}|Defesa:${defesa}|Sorte: ${sorte}</p>
-           
-        </div>
-        <p id="aventura"></p>`;
+    function detalhesDoHeroi(){
+        return document.getElementById("andar").innerHTML = `
+            <div class="titulo">
+               <h1>Herói: ${nome}</h1>
+               <p id="estatus">Vida: ${vidaHeroi}|Força: ${forca}|Defesa:${defesa}|Sorte: ${sorte}</p>
+               
+            </div>`;
+    }
     
-    document.getElementById("monstros").innerHTML = `
-    <h2>Monstro: ${inimigoDoAndar} </h2>
-    <p>Vida: ${vidaInimigo}|Força: ${inimigos[inimigoDoAndar]["ataque"]}|Defesa:${inimigos[inimigoDoAndar]["defesa"]}|Especial: ${inimigos[inimigoDoAndar]["especial"]}</p>
-    `;
+    function limpar(){
+        vidaInimigo = inimigos[inimigoDoAndar]["vida"];
+        inimigosAbatidos++
+        inimigoDoAndar = inimigo[inimigosAbatidos]
+        return document.getElementById("aventura").innerHTML = ``
+    }
 
+    function detalhesDoMonstro(){//função que escreve estatisticas e do monstro
+        return document.getElementById("monstros").innerHTML = `
+            <div class="titulo">
+                <h2>Monstro: ${inimigoDoAndar} </h2>
+            </div>
+            <div class="atributos">
+                <p>Vida: ${vidaInimigo}|Força: ${inimigos[inimigoDoAndar]["ataque"]}|Defesa:${inimigos[inimigoDoAndar]["defesa"]}|Especial: ${inimigos[inimigoDoAndar]["especial"]}</p>
+            </div>    
+            `;
+        document.getElementById("estatus").innerHTML = `<p id="estatus">Vida: ${vidaHeroi}|Força: ${forca}|Defesa:${defesa}|Sorte: ${sorte}</p>`;
+    }
+
+    function descricaoBatalhaHeroi(acontece){ // função que escreve a os o que ouve na batalha
+        if (acontece == "Esquiva"){
+            return document.getElementById("aventura").innerHTML += `<p>Você errou o golpe</p>`
+        }
+        if (critico){
+            return document.getElementById("aventura").innerHTML += `<p>Você causou ${danoHeroi} de dano com um Critico!!</p>`;
+        } else {
+            return document.getElementById("aventura").innerHTML += `<p>Você causou ${danoHeroi} de dano</p>`;
+        } 
+    }
+    function descricaoBatalhaInimigo(acontece){
+        if (acontece == "Esquiva"){
+            return document.getElementById("aventura").innerHTML += `<p>O inimigo se esquivou do ataque e lhe causou ${danoInimigo} de dano</p>`
+        } else if(acontece == "Segundo Ataque"){
+            return document.getElementById("aventura").innerHTML += `<p>O inimigo lhe acertou duas vezes e causou ${danoInimigo} de dano</p>`
+        } else if(acontece == "") {
+            return document.getElementById("aventura").innerHTML += `<p>O inimigo lhe causou ${danoInimigo} de dano</p>`
+        }
+        
+    }
+
+    function descricaoBatalha(acontece){
+        return descricaoBatalhaHeroi(acontece), descricaoBatalhaInimigo(acontece)
+    }
 
     function golpe(){
-        let danoHeroi = forca - inimigos[inimigoDoAndar]["defesa"];
+        danoHeroi = forca - inimigos[inimigoDoAndar]["defesa"];
+        danoInimigo = inimigos[inimigoDoAndar]["ataque"] - defesa;
+        especial = inimigos[inimigoDoAndar]["especial"];
+        
+        if (danoInimigo <= 0){//Para não bugar e ficar em uma luta infinita de dano 0
+            danoInimigo = 1
+        }
         if (danoHeroi <= 0){//Para não bugar e ficar em uma luta infinita de dano 0
             danoHeroi = 1
         }
         if (deusaDosNumerosAleatorios() <= sorte){//Gera critico
             danoHeroi*=2
+            critico = true
         }
-        let danoInimigo = inimigos[inimigoDoAndar]["ataque"] - defesa;
-        if (danoInimigo <= 0){//Para não bugar e ficar em uma luta infinita de dano 0
-            danoInimigo = 1
-        }
-        let especial = inimigos[inimigoDoAndar]["especial"];
+        
         
 
         if (especial == "Esquiva"){ //Esta merda vai burgar e gera uma luta infinita de dano 0
             if (deusaDosNumerosAleatorios() <= 6){
                 danoHeroi = 0;
+                acontece = "Esquiva";
             }
-        } else if(especial == "Segundo_Ataque"){
+        } else if(especial == "Segundo Ataque"){
             if (deusaDosNumerosAleatorios() <= 4){
                 danoInimigo*=2;
+                acontece = "Segundo Ataque";
             }
         } else if (especial == "Veneno") {
             danoInimigo+=5;
         } else if (especial == "Sangria"){
-            vidaInimigo+=danoInimigo;
+            vidaInimigo+=Math.floor(danoInimigo / 2);
         } else if (especial == "Acido"){
             danoInimigo = inimigos[inimigoDoAndar]["ataque"] - Math.floor(defesa / 2);
-        } else if (especial == "Ataque_Duplo"){
+        } else if (especial == "Ataque Duplo"){
             if (vidaInimigo/2 <= inimigos[inimigoDoAndar]["vida"]){
                 danoInimigo*=2;
             }
         } // eu percebi agora que eu podia fazer com mathcase mas eu ja terminei vai ficar assim
+        
         vidaInimigo-=danoHeroi;
         vidaHeroi-=danoInimigo;
-        document.getElementById("monstros").innerHTML = `
-            <h2>Monstro: ${inimigoDoAndar} </h2>
-            <p>Vida: ${vidaInimigo}|Força: ${inimigos[inimigoDoAndar]["ataque"]}|Defesa:${inimigos[inimigoDoAndar]["defesa"]}|Especial: ${inimigos[inimigoDoAndar]["especial"]}</p>
-        `;
-        document.getElementById("estatus").innerHTML = `<p id="estatus">Vida: ${vidaHeroi}|Força: ${forca}|Defesa:${defesa}|Sorte: ${sorte}</p>`;
-        
+        if(vidaHeroi > 0 && vidaInimigo > 0){
+            detalhesDoHeroi()
+            detalhesDoMonstro()
+            descricaoBatalha(acontece)
+
+        } else if (vidaInimigo <= 0){
+            limpar()
+            nivel()
+            detalhesDoHeroi()
+            detalhesDoMonstro()
+        } else if (vidaHeroi <= 0){
+            gameover()
+        }
+        critico = false;
+        acontece = "";
+        document.getElementById("derrota").innerHTML = `<p>Inimigos Abatidos: ${inimigosAbatidos}</p>`;
+        if (inimigosAbatidos == 6){
+            vitoria()
+        }
     }
-
-    
-        
-    /*while (vidaInimigo > 0 && vidaHeroi > 0){
-        vidaHeroi-=golpe(forca, inimigos[inimigoDoAndar]["defesa"], sorte);
-        vidaInimigo-=golpe(inimigos[inimigoDoAndar]["ataque"], defesa)
-
-    }*/
-    
-    
-    
-    
+    detalhesDoHeroi()
+    detalhesDoMonstro()
+    document.getElementById("derrota").innerHTML = `<p>Inimigos Abatidos: ${inimigosAbatidos}</p>`
 
 
 </script>
